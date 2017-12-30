@@ -43,14 +43,9 @@ exports.update_zip_by_id = function( req, res ){
 
 // DELETE /v1/zipcodes/:entry_id
 exports.remove_zip_by_id = function( req, res ){
-  try{
-    ZipCode.findByIdAndRemove({ _id: req.params.entry_id }, function( err, entry ){
-      handleAnswer( req, res, err, entry, 'Entry Removed', 'Entry '+ req.params.entry_id +' not found.' );
-    });
-  }catch( exception ){
-    log( exception )
-    sendResponse( res, 500, 2, 'Delete request could not be completed', req.originalUrl, null, exception );
-  }
+  ZipCode.findByIdAndRemove({ _id: req.params.entry_id }, function( err, entry ){
+    handleAnswer( req, res, err, entry, 'Entry Removed', 'Entry '+ req.params.entry_id +' not found.' );
+  });
 };
 
 function handleAnswer( req, res, err, entry, positive_message, negative_message ){
