@@ -43,9 +43,14 @@ exports.update_zip_by_id = function( req, res ){
 
 // DELETE /v1/zipcodes/:entry_id
 exports.remove_zip_by_id = function( req, res ){
-  ZipCode.remove({ _id: req.params.entry_id }, function( err, entry ){
-    handleAnswer( req, res, err, entry, 'Entry Removed', 'Entry '+ req.params.entry_id +' not found.' );
-  });
+  try{
+    ZipCode.findByIdAndRemove({ _id: req.params.entry_id }, function( err, entry ){
+      handleAnswer( req, res, err, entry, 'Entry Removed', 'Entry '+ req.params.entry_id +' not found.' );
+    });
+  }catch( exception ){
+    log( exception )
+    sendResponse( res, 500, 2, 'Delete request could not be completed', req.originalUrl, null, exception );
+  }
 };
 
 function handleAnswer( req, res, err, entry, positive_message, negative_message ){
@@ -53,10 +58,14 @@ function handleAnswer( req, res, err, entry, positive_message, negative_message 
   if( err ){
     sendResponse( res, 500, 2, 'Request could not be completed', req.originalUrl, entry, err );
   }else{
-    if( entry.length == 0 ){
-      sendResponse( res, 404, 1, negative_message, req.originalUrl, entry, err );
+    if( entry == null ){
+      sendResponse( res, 400, 1, negative_message, req.originalUrl, entry, err );
     }else{
-      sendResponse( res, 200, 0, positive_message, req.originalUrl, entry, err );
+      if( entry.length == 0 ){
+        sendResponse( res, 404, 1, negative_message, req.originalUrl, entry, err );
+      }else{
+        sendResponse( res, 200, 0, positive_message, req.originalUrl, entry, err );
+      }
     }
   }
 }
@@ -64,7 +73,7 @@ function handleAnswer( req, res, err, entry, positive_message, negative_message 
 function sendResponse( res, http_code, response_code, response_message, url, entry, error ){
   try{
     if( http_code == 200 ){
-      res.json( { response_code: response_code, response_message: response_messge, request_url: url, entry: entry } );
+      res.json( { response_code: response_code, response_message: response_message, request_url: url, entry: entry } );
     }else{
       res.status( http_code ).send( { response_code: response_code, response_message: response_message, request_url: url, entry: entry, error: error } );
     }

@@ -7,7 +7,7 @@ module.exports = function( app ){
     .get( manager.list_all_zipcodes )
     .post( manager.create_entry );
 
-  app.route( '/v1/zipcodes/:request_id' )
+  app.route( '/v1/zipcodes/:entry_id' )
     .get( manager.list_by_country_code )
     .put( manager.update_zip_by_id )
     .delete( manager.remove_zip_by_id );
