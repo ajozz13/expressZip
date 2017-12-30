@@ -10,11 +10,13 @@ var ZipSchema = new Schema({
   },
   zip_start:{
     type: String,
-    required: 'Enter the start range of Zipcode.'
+    required: 'Enter the start range of Zipcode.',
+    unique: true
   },
   zip_end:{
     type: String,
-    required: 'Enter the last range of Zipcode.'
+    required: 'Enter the end range of Zipcode.',
+    unique: true
   },
   state_code:{
     type: String,
@@ -23,6 +25,10 @@ var ZipSchema = new Schema({
   airport_code:{
     type: String,
     required: 'Enter the default airport code for this zipcode.'
+  },
+  city_name:{
+    type: String,
+    required: 'Enter the name of the city.'
   },
   created_date:{
     type: Date,
