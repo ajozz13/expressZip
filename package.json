@@ -4,7 +4,7 @@
   "description": "Retrieve details of a zip code",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jasmine-node spec"
   },
   "repository": {
     "type": "git",
@@ -15,5 +15,9 @@
   "dependencies": {
     "express": "^4.16.2",
     "mongoose": "^5.0.0-rc0"
+  },
+  "devDependencies": {
+    "jasmine-node": "^1.14.5",
+    "request": "^2.83.0"
   }
 }
