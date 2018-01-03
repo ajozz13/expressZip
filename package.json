@@ -8,10 +8,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "."
+    "url": "https://github.com/ajozz13/expressZip.git"
   },
   "author": "Alberto Ochoa",
-  "license": "ISC",
+  "license": "GPL-3.0",
   "dependencies": {
     "express": "^4.16.2",
     "mongoose": "^5.0.0-rc0"
