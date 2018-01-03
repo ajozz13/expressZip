@@ -27,7 +27,8 @@ exports.list_by_country_code = function( req, res ){
 
 // GET /v1/zipcodes/:country_code/:zip_code
 exports.list_by_zip_code = function( req, res ){
-  ZipCode.find( { country_code: req.params.country_code, zip_start: req.params.zip_code },
+  ZipCode.find( { country_code: req.params.country_code, zip_start: { $lte: req.params.zip_code }, zip_end: { $gte: req.params.zip_code } },
+//  ZipCode.find( { country_code: req.params.country_code } ).where( 'zip_start' ).lte( req.params.zip_code ).where( 'zip_end' ).gte( req.params.zip_code ).exec(
     function( err, entry ){
       handleAnswer( req, res, err, entry, 'OK', 'Zip: '+ req.params.zip_code +' not found in country: '+ req.params.country_code );
   });
@@ -49,7 +50,6 @@ exports.remove_zip_by_id = function( req, res ){
 };
 
 function handleAnswer( req, res, err, entry, positive_message, negative_message ){
-  console.log( entry );
   if( err ){
     sendResponse( res, 500, 2, 'Request could not be completed', req.originalUrl, entry, err );
   }else{
@@ -70,6 +70,8 @@ function sendResponse( res, http_code, response_code, response_message, url, ent
     if( http_code == 200 ){
       res.json( { response_code: response_code, response_message: response_message, request_url: url, entry: entry } );
     }else{
+      if( null === error )
+        error = response_message;
       res.status( http_code ).send( { response_code: response_code, response_message: response_message, request_url: url, entry: entry, error: error } );
     }
   }catch( exception ){
