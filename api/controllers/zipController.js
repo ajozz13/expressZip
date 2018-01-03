@@ -6,7 +6,7 @@ var mongoose = require( 'mongoose' ),
 // GET /v1/zipCodes
 exports.list_all_zipcodes = function( req, res ){
   ZipCode.find( {}, function( err, entry ){
-    handleAnswer( req, res, err, entry, 'OK','No List found.' );
+    handleAnswer( req, res, err, entry, 200, 'OK','No List found.' );
   });
 };
 
@@ -14,14 +14,14 @@ exports.list_all_zipcodes = function( req, res ){
 exports.create_entry = function( req, res ){
   var new_entry = new ZipCode( req.body );
   new_entry.save( function( err, entry ){
-    handleAnswer( req, res, err, entry, 'Created','Entry could not be created' );
+    handleAnswer( req, res, err, entry, 201, 'Created','Entry could not be created' );
   });
 };
 
 // GET /v1/zipcodes/:entry_id
 exports.list_by_country_code = function( req, res ){
   ZipCode.find( { country_code: req.params.entry_id }, function( err, entry ){
-    handleAnswer( req, res, err, entry, 'OK','No list found for country_code '+ req.params.entry_id );
+    handleAnswer( req, res, err, entry, 200,'OK','No list found for country_code '+ req.params.entry_id );
   });
 };
 
@@ -30,7 +30,7 @@ exports.list_by_zip_code = function( req, res ){
   ZipCode.find( { country_code: req.params.country_code, zip_start: { $lte: req.params.zip_code }, zip_end: { $gte: req.params.zip_code } },
 //  ZipCode.find( { country_code: req.params.country_code } ).where( 'zip_start' ).lte( req.params.zip_code ).where( 'zip_end' ).gte( req.params.zip_code ).exec(
     function( err, entry ){
-      handleAnswer( req, res, err, entry, 'OK', 'Zip: '+ req.params.zip_code +' not found in country: '+ req.params.country_code );
+      handleAnswer( req, res, err, entry, 200, 'OK', 'Zip: '+ req.params.zip_code +' not found in country: '+ req.params.country_code );
   });
 };
 
@@ -38,20 +38,21 @@ exports.list_by_zip_code = function( req, res ){
 exports.update_zip_by_id = function( req, res ){
   ZipCode.findOneAndUpdate({ _id: req.params.entry_id }, req.body, { new: true },
     function( err, entry ){
-      handleAnswer( req, res, err, entry, 'Entry Updated', 'Entry '+ req.params.entry_id +' not found.' );
+      handleAnswer( req, res, err, entry, 200, 'Entry Updated', 'Entry '+ req.params.entry_id +' not found.' );
   });
 };
 
 // DELETE /v1/zipcodes/:entry_id
 exports.remove_zip_by_id = function( req, res ){
   ZipCode.findByIdAndRemove({ _id: req.params.entry_id }, function( err, entry ){
-    handleAnswer( req, res, err, entry, 'Entry Removed', 'Entry '+ req.params.entry_id +' not found.' );
+    handleAnswer( req, res, err, entry, 200, 'Entry Removed', 'Entry '+ req.params.entry_id +' not found.' );
   });
 };
 
-function handleAnswer( req, res, err, entry, positive_message, negative_message ){
+function handleAnswer( req, res, err, entry, http_code, positive_message, negative_message ){
   if( err ){
-    sendResponse( res, 500, 2, 'Request could not be completed', req.originalUrl, entry, err );
+    http_code = err.errors ? 400 : 500;
+    sendResponse( res, http_code, 2, 'Request could not be completed', req.originalUrl, entry, err );
   }else{
     if( entry == null ){
       sendResponse( res, 400, 1, negative_message, req.originalUrl, entry, err );
@@ -59,7 +60,7 @@ function handleAnswer( req, res, err, entry, positive_message, negative_message 
       if( entry.length == 0 ){
         sendResponse( res, 404, 1, negative_message, req.originalUrl, entry, err );
       }else{
-        sendResponse( res, 200, 0, positive_message, req.originalUrl, entry, err );
+        sendResponse( res, http_code, 0, positive_message, req.originalUrl, entry, err );
       }
     }
   }
@@ -67,8 +68,8 @@ function handleAnswer( req, res, err, entry, positive_message, negative_message 
 
 function sendResponse( res, http_code, response_code, response_message, url, entry, error ){
   try{
-    if( http_code == 200 ){
-      res.json( { response_code: response_code, response_message: response_message, request_url: url, entry: entry } );
+    if( http_code == 200 || http_code == 201 ){
+      res.status( http_code ).json( { response_code: response_code, response_message: response_message, request_url: url, entry: entry } );
     }else{
       if( null === error )
         error = response_message;
