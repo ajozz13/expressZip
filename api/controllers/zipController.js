@@ -6,7 +6,7 @@ var mongoose = require( 'mongoose' ),
 // GET /v1/zipCodes
 exports.list_all_zipcodes = function( req, res ){
   ZipCode.find( {}, function( err, entry ){
-    handleAnswer( req, res, err, entry, 200, 'OK','No List found.' );
+    handleAnswer( req, res, err, entry, 200, 'OK','No List found' );
   });
 };
 
