@@ -6,6 +6,50 @@ describe( 'expressZip server', function(){
   //READ requests
   describe( 'GET /v1/zipcodes', function(){
 
+    var items = { country_code: 'BR', city_name: 'TURIUBA', state_code: 'SP', airport_code: 'SAO', zip_start: '15280-000', zip_end: '15284-999' };
+    var created_id;
+
+    it( 'should return error response when requesting empty lists', function(done){
+      request.get( base_url+'/v1/zipcodes', { json: true }, function( error, response, body ){
+        try{
+          expect( body ).not.toBe( null );
+          expect( response.statusCode ).toBe( 404 );
+          expect( body.response_code ).toBe( 1 );
+          expect( body.response_message ).toBe( "No List found" );
+          expect( body.request_url ).toBe( "/v1/zipcodes" );
+          expect( body.entry ).not.toBe( null );
+          expect( body.entry.length ).toBe( 0 );
+          expect( body.error ).toBe( "No List found" );
+          done();
+        }catch( exc ){
+          console.log( exc );
+          expect().fail();
+        }
+      });
+    });
+
+    it( 'can post a simple test via json', function(done){
+      //Post as JSON input
+      request.post( base_url+'/v1/zipcodes', { json: items, headers: { 'Content-Type' : 'application/json' } }, function( error, response, body ){
+        try{
+          expect( body ).not.toBe( null );
+          expect( response.statusCode ).toBe( 201 );
+          expect( body.response_code ).toBe( 0 );
+          expect( body.response_message ).toBe( "Created" );
+          expect( body.request_url ).toBe( "/v1/zipcodes" );
+          expect( body.entry ).not.toBe( null );
+          expect( body.entry.airport_code ).toBe( "SAO" );
+          expect( body.entry.state_code ).toBe( "SP" );
+          created_id = body.entry._id;
+          done();
+        }catch( exc ){
+          console.log( exc );
+          expect().fail();
+        }
+      });
+
+    });
+
     it( 'retrieves the full list of zip codes', function(done){
       request.get( base_url+'/v1/zipcodes', { json: true }, function( error, response, body ){
         try{
@@ -95,6 +139,25 @@ describe( 'expressZip server', function(){
           expect().fail();
         }
       });
+    });
+
+    it( 'deletes the GET test entry', function(done){
+        request.delete( base_url+'/v1/zipcodes/'+created_id, function( error, response, body ){
+          try{
+            expect( body ).not.toBe( null );
+            var ans = JSON.parse( body );
+            expect( response.statusCode ).toBe( 200 );
+            expect( ans.response_code ).toBe( 0 );
+            expect( ans.response_message ).toBe( "Entry Removed" );
+            expect( ans.request_url ).toBe( "/v1/zipcodes/"+created_id );
+            expect( ans.entry ).not.toBe( null );
+            expect( ans.entry.airport_code ).toBe( "SAO" );
+            done();
+          }catch( exc ){
+            console.log( exc );
+            expect().fail();
+          }
+        });
     }); //END GET
 
     //CREATE UPDATE AND DELETE A REQUEST
